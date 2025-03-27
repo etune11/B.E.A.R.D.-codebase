@@ -1,0 +1,45 @@
+#include <Wire.h>   // Required for I2C communication (if your accelerometer uses I2C)
+#include <Adafruit_Sensor.h>   // If using Adafruit's library for accelerometers
+#include <Adafruit_LSM303_U.h> // Example library for an accelerometer
+
+// Define buzzer pin
+const int buzzerPin = 8;  // Using Pin 8 for the buzzer
+
+// Initialize accelerometer (this is an example, change based on your sensor)
+Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(12345);
+
+void setup() {
+  Serial.begin(9600);
+  
+  // Start the accelerometer
+  if (!accel.begin()) {
+    Serial.println("Failed to initialize the accelerometer!");
+    while (1);  // Stay here forever if the sensor isn't found
+  }
+  
+  // Set buzzer pin as output
+  pinMode(buzzerPin, OUTPUT);
+}
+
+void loop() {
+  sensors_event_t event;
+  accel.getEvent(&event);
+
+  // Get the magnitude of the acceleration (total force)
+  float acceleration = sqrt(event.acceleration.x * event.acceleration.x +
+                            event.acceleration.y * event.acceleration.y +
+                            event.acceleration.z * event.acceleration.z);
+
+  // Output the acceleration to the Serial Monitor (for debugging)
+  Serial.print("Acceleration: ");
+  Serial.println(acceleration);
+
+  // Check if acceleration exceeds the 0.3g threshold
+  if (acceleration > 0.3) {
+    digitalWrite(buzzerPin, HIGH);  // Turn the buzzer on
+  } else {
+    digitalWrite(buzzerPin, LOW);   // Turn the buzzer off
+  }
+
+  delay(100);  // Short delay for stability
+}
