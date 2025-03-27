@@ -1,0 +1,51 @@
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_ADXL343.h>
+
+// Create an ADXL343 object with default I2C address (0x53)
+Adafruit_ADXL343 accel = Adafruit_ADXL343(12345); // Unique ID, can be any number
+
+void setup() {
+  Serial.begin(9600);
+  while (!Serial) {
+    delay(10); // Wait for serial connection
+  }
+  
+  Serial.println("ADXL343 Accelerometer Test");
+  
+  // Initialize the accelerometer
+  if (!accel.begin()) {
+    Serial.println("No ADXL343 detected ... Check your wiring!");
+    while (1); // Halt if sensor not found
+  }
+  
+  // Set range to ±2g (options: ADXL343_RANGE_16_G, ADXL343_RANGE_8_G, ADXL343_RANGE_4_G, ADXL343_RANGE_2_G)
+  accel.setRange(ADXL343_RANGE_2_G);
+  
+  // Set data rate (options: ADXL343_DATARATE_3200_HZ down to ADXL343_DATARATE_0_10_HZ)
+  accel.setDataRate(ADXL343_DATARATE_100_HZ);
+  
+  Serial.println("Accelerometer initialized successfully!");
+  Serial.println("X(g)\tY(g)\tZ(g)");
+}
+
+void loop() {
+  // Get a new sensor event
+  sensors_event_t event;
+  accel.getEvent(&event);
+  
+  // Convert raw acceleration to G-forces
+  float x_g = event.acceleration.x / 9.81; // Divide by 9.81 m/s² to convert to g
+  float y_g = event.acceleration.y / 9.81;
+  float z_g = event.acceleration.z / 9.81;
+  
+  // Print the values to Serial Monitor
+  Serial.print(x_g, 2); // 2 decimal places
+  Serial.print("\t");
+  Serial.print(y_g, 2);
+  Serial.print("\t");
+  Serial.print(z_g, 2);
+  Serial.println();
+  
+  delay(100); // Update every 100ms
+}
